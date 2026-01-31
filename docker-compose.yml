@@ -1,0 +1,31 @@
+services:
+  datapilot-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: datapilot-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+     
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: uvicorn server:app --host 0.0.0.0 --port 8000 
+  datapilot-web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: datapilot-web
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./datapilot-ui:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      
+      - NEXT_PUBLIC_API_URL=http://localhost:8000 
+    depends_on:
+      - datapilot-api
+

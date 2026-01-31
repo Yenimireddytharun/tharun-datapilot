@@ -1,0 +1,5 @@
+# Business Analyst Workflow
+load "monthly_sales.csv" as sales
+filter sales where revenue > 5000 as high_value_sales
+plot high_value_sales as bar_chart
+plot sales as line_chart

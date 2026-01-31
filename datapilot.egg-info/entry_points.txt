@@ -1,0 +1,2 @@
+[console_scripts]
+datapilot = cli_prototype:main

@@ -1,0 +1,4 @@
+DP.Query(sales_data, all)
+DP.Transform(sales_data)
+DP.Model(sales_data, random_forest)
+DP.Visualize(sales_data, prediction_chart)

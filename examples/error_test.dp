@@ -1,0 +1,3 @@
+LOAD "data.csv" AS raw_data
+    FILTER raw_data WHERE price > 100 AS filtered_data
+    PLOT high_value_sales bar_chart

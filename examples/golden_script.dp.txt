@@ -1,0 +1,12 @@
+\\ Step 1: Data Operations
+load "market_data.csv" AS raw_data
+Filter raw_data WHERE price > 100 as expensive_items
+
+\\ Step 2: Machine Learning
+\\ Note how 'split' is lowercase and 'TRAIN' is uppercase
+split expensive_items RATIO 0.75 as train_data, test_data
+TRAIN "RandomForest" on train_data TARGET "demand" as demand_model
+
+\\ Step 3: Business Intelligence
+Predict demand_model ON test_data AS final_results
+plot final_results as line_chart

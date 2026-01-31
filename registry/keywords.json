@@ -1,0 +1,7 @@
+{
+  "data_keywords": ["load", "select", "from", "filter", "join", "group", "save", "as"],
+  "ml_keywords": ["train", "predict", "evaluate", "split", "target", "on"],
+  "bi_keywords": ["plot", "dashboard", "view", "bar_chart", "line_chart", "scatter"],
+  "symbols": ["\\", "=", "==", ">", "<", "->", ";", "(", ")"],
+  "data_types": ["string", "number", "boolean"]
+}

@@ -1,0 +1,5 @@
+\\ ML Specialist Workflow
+load "sensor_data.csv" as telemetry
+split telemetry ratio 0.8 as train_set, test_set
+train "XGBoost" on train_set target "failure_prediction" as model_v1
+predict model_v1 on test_set as predictions
