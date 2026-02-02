@@ -15,7 +15,7 @@ export default function DataPilotDashboard() {
     formData.append('file', file);
     try {
       setLogs(prev => [...prev, `[LOG] Uploading ${file.name}...`]);
-      await axios.post('http://localhost:8000/upload', formData);
+      await axios.post('http://tharun-datapilot.onrender.com/upload', formData);
       setLogs(prev => [...prev, `[LOG] Dataset Loaded. Ready to run.`]);
     } catch (err) {
       setLogs(prev => [...prev, "[ERROR] Upload failed."]);
@@ -27,7 +27,7 @@ export default function DataPilotDashboard() {
       setImage(null); // Clear previous result
       setLogs(prev => [...prev, "[SYSTEM] Executing script..."]);
 
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/execute`, { script: code });
+      const res = await axios.post(`https://tharun-datapilot.onrender.com/execute`, { script: code });
       
       // Update logs
       if (res.data.execution_logs) {
