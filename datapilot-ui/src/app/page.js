@@ -8,8 +8,8 @@ export default function DataPilotDashboard() {
   const [logs, setLogs] = useState([]);
   const [image, setImage] = useState(null);
 
-  // YOUR WORKING BACKEND API URL - Hardcoded to bypass env variable issues
-  const API_URL = "https://tharun-datapilot.onrender.com";
+  // FIXED: Must point to the API URL specifically
+  const API_URL = "https://tharun-datapilot-api.onrender.com";
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
@@ -19,13 +19,11 @@ export default function DataPilotDashboard() {
     
     try {
       setLogs(prev => [...prev, `[LOG] Uploading ${file.name}...`]);
-      // FIXED: Full path to your working Render backend
       const res = await axios.post(`${API_URL}/upload`, formData);
       setLogs(prev => [...prev, `[LOG] ${res.data.message}`]);
       setLogs(prev => [...prev, `[LOG] Dataset Loaded. Ready to run.`]);
     } catch (err) {
-      console.error("Upload Error:", err);
-      setLogs(prev => [...prev, "[ERROR] Upload failed. Confirm API is live at the link above."]);
+      setLogs(prev => [...prev, "[ERROR] Upload failed. Check if API is live."]);
     }
   };
 
@@ -33,7 +31,6 @@ export default function DataPilotDashboard() {
     try {
       setImage(null);
       setLogs(prev => [...prev, "[SYSTEM] Executing script..."]);
-      // FIXED: Explicitly routing to the backend API address
       const res = await axios.post(`${API_URL}/execute`, { script: code });
       
       if (res.data.execution_logs) {
@@ -43,7 +40,6 @@ export default function DataPilotDashboard() {
         setImage(`data:image/png;base64,${res.data.visualization}`);
       }
     } catch (err) {
-      console.error("Execute Error:", err);
       setLogs(prev => [...prev, "[ERROR] Connection to API failed."]);
     }
   };
@@ -57,15 +53,13 @@ export default function DataPilotDashboard() {
             UPLOAD CSV
             <input type="file" onChange={handleFileUpload} className="hidden" />
           </label>
-          <button onClick={handleRun} className="bg-blue-600 px-8 py-2 rounded font-bold hover:bg-blue-700 text-white">RUN SCRIPT</button>
+          <button onClick={handleRun} className="bg-blue-600 px-8 py-2 rounded font-bold hover:bg-blue-700">RUN SCRIPT</button>
         </div>
       </div>
-
       <div className="flex flex-1 mt-6 gap-6 overflow-hidden">
         <div className="w-1/2 border border-gray-800 rounded overflow-hidden">
           <Editor height="100%" theme="vs-dark" defaultLanguage="python" value={code} onChange={(v) => setCode(v)} />
         </div>
-        
         <div className="w-1/2 flex flex-col gap-4 overflow-y-auto">
           <div className="bg-gray-900 p-4 rounded min-h-[200px] border border-gray-800">
             <h3 className="text-blue-400 text-xs font-bold uppercase mb-2">System Logs</h3>
@@ -77,16 +71,8 @@ export default function DataPilotDashboard() {
               ))}
             </div>
           </div>
-          
-          <div className="bg-gray-900 p-4 rounded flex-1 border border-gray-800 flex flex-col">
-            <h3 className="text-blue-400 text-xs font-bold uppercase mb-2">Visualization</h3>
-            <div className="flex-1 flex items-center justify-center border border-dashed border-gray-700 rounded bg-black">
-              {image ? (
-                <img src={image} className="max-w-full max-h-full object-contain" alt="Data Visualization" />
-              ) : (
-                <span className="text-gray-600 italic">No visualization generated</span>
-              )}
-            </div>
+          <div className="bg-gray-900 p-4 rounded flex-1 border border-gray-800 flex flex-col items-center justify-center">
+            {image ? <img src={image} className="max-w-full max-h-full" alt="Viz" /> : <span className="text-gray-600">No visualization generated</span>}
           </div>
         </div>
       </div>
