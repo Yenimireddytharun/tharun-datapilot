@@ -8,7 +8,7 @@ export default function DataPilotDashboard() {
   const [logs, setLogs] = useState([]);
   const [image, setImage] = useState(null);
 
-  // YOUR WORKING BACKEND API URL
+  // YOUR WORKING BACKEND API URL - Hardcoded to bypass env variable issues
   const API_URL = "https://tharun-datapilot.onrender.com";
 
   const handleFileUpload = async (event) => {
@@ -19,12 +19,13 @@ export default function DataPilotDashboard() {
     
     try {
       setLogs(prev => [...prev, `[LOG] Uploading ${file.name}...`]);
-      // Fixed: explicitly call the API_URL
-      await axios.post(`${API_URL}/upload`, formData);
+      // FIXED: Full path to your working Render backend
+      const res = await axios.post(`${API_URL}/upload`, formData);
+      setLogs(prev => [...prev, `[LOG] ${res.data.message}`]);
       setLogs(prev => [...prev, `[LOG] Dataset Loaded. Ready to run.`]);
     } catch (err) {
-      console.error(err);
-      setLogs(prev => [...prev, "[ERROR] Upload failed. Make sure API is live."]);
+      console.error("Upload Error:", err);
+      setLogs(prev => [...prev, "[ERROR] Upload failed. Confirm API is live at the link above."]);
     }
   };
 
@@ -32,7 +33,7 @@ export default function DataPilotDashboard() {
     try {
       setImage(null);
       setLogs(prev => [...prev, "[SYSTEM] Executing script..."]);
-      // Fixed: explicitly call the API_URL
+      // FIXED: Explicitly routing to the backend API address
       const res = await axios.post(`${API_URL}/execute`, { script: code });
       
       if (res.data.execution_logs) {
@@ -42,7 +43,7 @@ export default function DataPilotDashboard() {
         setImage(`data:image/png;base64,${res.data.visualization}`);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Execute Error:", err);
       setLogs(prev => [...prev, "[ERROR] Connection to API failed."]);
     }
   };
@@ -50,13 +51,13 @@ export default function DataPilotDashboard() {
   return (
     <div className="flex flex-col h-screen bg-black text-white p-6">
       <div className="flex justify-between items-center border-b border-gray-800 pb-4">
-        <h1 className="text-2xl font-bold text-blue-500"> Tharun's - DATAPILOT </h1>
+        <h1 className="text-2xl font-bold text-blue-500">DATAPILOT PRO</h1>
         <div className="flex gap-4">
           <label className="bg-white text-black px-4 py-2 rounded font-bold cursor-pointer hover:bg-gray-200">
             UPLOAD CSV
             <input type="file" onChange={handleFileUpload} className="hidden" />
           </label>
-          <button onClick={handleRun} className="bg-blue-600 px-8 py-2 rounded font-bold hover:bg-blue-700">RUN SCRIPT</button>
+          <button onClick={handleRun} className="bg-blue-600 px-8 py-2 rounded font-bold hover:bg-blue-700 text-white">RUN SCRIPT</button>
         </div>
       </div>
 
@@ -79,7 +80,7 @@ export default function DataPilotDashboard() {
           
           <div className="bg-gray-900 p-4 rounded flex-1 border border-gray-800 flex flex-col">
             <h3 className="text-blue-400 text-xs font-bold uppercase mb-2">Visualization</h3>
-            <div className="flex-1 flex items-center justify-center border border-dashed border-gray-700 rounded">
+            <div className="flex-1 flex items-center justify-center border border-dashed border-gray-700 rounded bg-black">
               {image ? (
                 <img src={image} className="max-w-full max-h-full object-contain" alt="Data Visualization" />
               ) : (
