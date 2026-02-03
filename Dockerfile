@@ -1,16 +1,18 @@
-FROM python:3.9-slim
+FROM node:18-alpine
+
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Fix: Path must match your local structure
+COPY datapilot-ui/package.json datapilot-ui/package-lock.json* ./
+RUN npm install
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY datapilot-ui/ .
 
-COPY . .
+# CRITICAL: This "bakes" the URL into the code during build
+ARG NEXT_PUBLIC_API_URL=https://tharun-datapilot.onrender.com
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-# The PORT will be provided by Render at runtime
-EXPOSE 8000
-CMD ["sh", "-c", "uvicorn server:app --host 0.0.0.0 --port ${PORT:-8000}"]
+RUN npm run build
+
+EXPOSE 3000
+CMD ["npm", "start"]
