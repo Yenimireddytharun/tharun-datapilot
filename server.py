@@ -18,7 +18,7 @@ app = FastAPI()
 # FIXED: Read the Allowed Origin from Environment Variables or default to all
 allowed_origins = os.getenv("CORS_ORIGIN", "*").split(",")
 
-
+# In your server.py file
 app.add_middleware(
     CORSMiddleware,
     # This tells the backend exactly which websites are allowed to send files
