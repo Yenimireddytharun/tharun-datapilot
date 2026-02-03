@@ -1,19 +1,16 @@
-FROM node:20
-
+FROM python:3.9-slim
 WORKDIR /app
 
-# Copy package files
-COPY datapilot-ui/package*.json ./
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Fresh install to ensure Linux binaries match
-RUN npm install
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy frontend code
-COPY datapilot-ui/ .
+COPY . .
 
-# FIXED: Correct spacing to avoid 'command not found'
-RUN rm -rf .next
-
-EXPOSE 3000
-
-CMD ["npm", "run", "dev"]
+# The PORT will be provided by Render at runtime
+EXPOSE 8000
+CMD ["sh", "-c", "uvicorn server:app --host 0.0.0.0 --port ${PORT:-8000}"]
