@@ -47,7 +47,7 @@ export default function DataPilotDashboard() {
   return (
     <div className="flex flex-col h-screen bg-black text-white p-6">
       <div className="flex justify-between items-center border-b border-gray-800 pb-4">
-        <h1 className="text-2xl font-bold text-blue-500">DATAPILOT PRO</h1>
+        <h1 className="text-2xl font-bold text-blue-500"> Tharun's - DATAPILOT</h1>
         <div className="flex gap-4">
           <label className="bg-white text-black px-4 py-2 rounded font-bold cursor-pointer hover:bg-gray-200">
             UPLOAD CSV
