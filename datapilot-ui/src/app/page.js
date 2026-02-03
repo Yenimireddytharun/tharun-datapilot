@@ -1,48 +1,45 @@
 "use client";
 import React, { useState } from 'react';
-import Editor from '@monaco-editor/react';
 import axios from 'axios';
+import Editor from '@monaco-editor/react';
 
 export default function DataPilotDashboard() {
   const [code, setCode] = useState('DP.Query(data, all)\nDP.Visualize(data, bar_chart)');
   const [logs, setLogs] = useState([]);
   const [image, setImage] = useState(null);
 
-  // The base URL for your Render service
-  const BASE_URL = 'https://tharun-datapilot.onrender.com';
+  // YOUR WORKING BACKEND API URL
+  const API_URL = "https://tharun-datapilot.onrender.com";
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
     const formData = new FormData();
     formData.append('file', file);
+    
     try {
       setLogs(prev => [...prev, `[LOG] Uploading ${file.name}...`]);
-      // FIXED: Changed http to https and used variable
-      await axios.post(`${BASE_URL}/upload`, formData);
+      // Fixed: explicitly call the API_URL
+      await axios.post(`${API_URL}/upload`, formData);
       setLogs(prev => [...prev, `[LOG] Dataset Loaded. Ready to run.`]);
     } catch (err) {
       console.error(err);
-      setLogs(prev => [...prev, "[ERROR] Upload failed. Check console for details."]);
+      setLogs(prev => [...prev, "[ERROR] Upload failed. Make sure API is live."]);
     }
   };
 
   const handleRun = async () => {
     try {
-      setImage(null); 
+      setImage(null);
       setLogs(prev => [...prev, "[SYSTEM] Executing script..."]);
-
-      // FIXED: Used BASE_URL variable for consistency
-      const res = await axios.post(`${BASE_URL}/execute`, { script: code });
+      // Fixed: explicitly call the API_URL
+      const res = await axios.post(`${API_URL}/execute`, { script: code });
       
       if (res.data.execution_logs) {
         setLogs(res.data.execution_logs);
       }
-
       if (res.data.visualization) {
         setImage(`data:image/png;base64,${res.data.visualization}`);
-      } else {
-        setLogs(prev => [...prev, "[WARN] No visualization returned."]);
       }
     } catch (err) {
       console.error(err);
@@ -50,55 +47,45 @@ export default function DataPilotDashboard() {
     }
   };
 
-  const downloadChart = () => {
-    const link = document.createElement('a');
-    link.href = image;
-    link.download = 'DataPilot_Result.png';
-    link.click();
-  };
-
   return (
-    <div className="flex flex-col h-screen bg-black text-white font-sans">
-      <div className="p-6 bg-black border-b border-gray-900 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight mb-4">Tharun's <span className="text-blue-500">- DATAPILOT</span></h1>
-          <div className="flex gap-3">
-            <label className="bg-white text-black px-4 py-2 rounded text-xs font-bold cursor-pointer hover:bg-yellow-300 transition">
-              Choose File
-              <input type="file" onChange={handleFileUpload} className="hidden" />
-            </label>
-            <button onClick={() => {setImage(null); setLogs([]);}} className="bg-gray-700 px-4 py-2 rounded text-white font-bold">CLEAR ALL</button>
-          </div>
+    <div className="flex flex-col h-screen bg-black text-white p-6">
+      <div className="flex justify-between items-center border-b border-gray-800 pb-4">
+        <h1 className="text-2xl font-bold text-blue-500"> Tharun's - DATAPILOT </h1>
+        <div className="flex gap-4">
+          <label className="bg-white text-black px-4 py-2 rounded font-bold cursor-pointer hover:bg-gray-200">
+            UPLOAD CSV
+            <input type="file" onChange={handleFileUpload} className="hidden" />
+          </label>
+          <button onClick={handleRun} className="bg-blue-600 px-8 py-2 rounded font-bold hover:bg-blue-700">RUN SCRIPT</button>
         </div>
-        <button onClick={handleRun} className="bg-white text-black px-10 py-3 rounded text-black font-black hover:bg-gray-200 transition">RUN SCRIPT</button>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        <div className="w-1/2 border-r border-gray-900">
-          <Editor height="100%" theme="vs-dark" defaultLanguage="python" value={code} onChange={(v) => setCode(v)} options={{ fontSize: 14, minimap: { enabled: false } }} />
+      <div className="flex flex-1 mt-6 gap-6 overflow-hidden">
+        <div className="w-1/2 border border-gray-800 rounded overflow-hidden">
+          <Editor height="100%" theme="vs-dark" defaultLanguage="python" value={code} onChange={(v) => setCode(v)} />
         </div>
-
-        <div className="w-1/2 p-6 overflow-y-auto bg-black flex flex-col gap-8">
-          <div>
-            <h3 className="text-blue-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4">System Logs</h3>
-            <div className="font-mono text-sm">
-              {logs.map((l, i) => <div key={i} className="text-pink-500 mb-1">{l}</div>)}
+        
+        <div className="w-1/2 flex flex-col gap-4 overflow-y-auto">
+          <div className="bg-gray-900 p-4 rounded min-h-[200px] border border-gray-800">
+            <h3 className="text-blue-400 text-xs font-bold uppercase mb-2">System Logs</h3>
+            <div className="space-y-1">
+              {logs.map((l, i) => (
+                <div key={i} className={`font-mono text-sm ${l.includes('ERROR') ? 'text-red-400' : 'text-green-400'}`}>
+                  {l}
+                </div>
+              ))}
             </div>
           </div>
-
-          <div className="mt-8">
-            <h3 className="text-blue-500 text-[10px] font-bold uppercase tracking-[0.2em] mb-4 border-b border-gray-800 pb-2">Visualization</h3>
-            {image ? (
-              <div className="bg-white p-4 rounded-lg text-center animate-in fade-in zoom-in duration-500">
-                <div className="flex justify-end mb-2">
-                  <button onClick={downloadChart} className="bg-blue-600 text-white text-[9px] px-3 py-1 rounded font-bold hover:bg-blue-700">DOWNLOAD PNG       →</button>
-                </div>
-                <img src={image} className="mx-auto max-w-full h-auto rounded shadow-sm" alt="Result" />
-                <p className="text-blue-500 text-[10px] mt-2 font-bold uppercase">Visualization Ready</p>
-              </div>
-            ) : (
-              <div className="border-2 border-dashed border-gray-800 h-64 rounded-xl flex items-center justify-center text-gray-500 tracking-widest">NO VISUALIZATION GENERATED</div>
-            )}
+          
+          <div className="bg-gray-900 p-4 rounded flex-1 border border-gray-800 flex flex-col">
+            <h3 className="text-blue-400 text-xs font-bold uppercase mb-2">Visualization</h3>
+            <div className="flex-1 flex items-center justify-center border border-dashed border-gray-700 rounded">
+              {image ? (
+                <img src={image} className="max-w-full max-h-full object-contain" alt="Data Visualization" />
+              ) : (
+                <span className="text-gray-600 italic">No visualization generated</span>
+              )}
+            </div>
           </div>
         </div>
       </div>
