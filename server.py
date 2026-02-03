@@ -18,14 +18,18 @@ app = FastAPI()
 # FIXED: Read the Allowed Origin from Environment Variables or default to all
 allowed_origins = os.getenv("CORS_ORIGIN", "*").split(",")
 
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://tharun-datapilot.onrender.com","http://localhost:3000"],
+    # This tells the backend exactly which websites are allowed to send files
+    allow_origins=[
+        "https://tharun-datapilot.onrender.com", # Your Render URL
+        "http://localhost:3000"                  # For local testing
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 uploaded_data = None
 
 class ScriptRequest(BaseModel):
