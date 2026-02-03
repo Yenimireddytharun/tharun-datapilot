@@ -61,7 +61,7 @@ export default function DataPilotDashboard() {
     <div className="flex flex-col h-screen bg-black text-white font-sans">
       <div className="p-6 bg-black border-b border-gray-900 flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight mb-4">DATAPILOT <span className="text-blue-500">PRO</span></h1>
+          <h1 className="text-2xl font-bold tracking-tight mb-4">Tharun's <span className="text-blue-500">- DATAPILOT</span></h1>
           <div className="flex gap-3">
             <label className="bg-white text-black px-4 py-2 rounded text-xs font-bold cursor-pointer hover:bg-yellow-300 transition">
               Choose File
