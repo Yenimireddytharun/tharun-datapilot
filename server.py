@@ -9,19 +9,20 @@ import base64
 from io import BytesIO
 import matplotlib.pyplot as plt
 
-# Ensure these modules exist in your 'engine' folder
+# Imports from your engine folder
 from engine.lexer import lexer
 from engine.parser import parser
 from engine.executor import DataPilotExecutor
 
 app = FastAPI()
 
-# Standard CORS policy
+# Robust CORS policy
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://tharun-datapilot.onrender.com",
-        "http://localhost:3000"
+        "http://localhost:3000",
+        os.getenv("FRONTEND_URL", "*")
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -78,4 +79,4 @@ async def execute_script(request: ScriptRequest):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("server:app", host="0.0.0.0", port=port, reload=False)
+    uvicorn.run("server:app", host="0.0.0.0", port=port)
