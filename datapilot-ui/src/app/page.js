@@ -8,7 +8,6 @@ export default function DataPilotDashboard() {
   const [logs, setLogs] = useState([]);
   const [image, setImage] = useState(null);
 
-  // FIXED: Must point to the API URL specifically
   const API_URL = "https://tharun-datapilot-api.onrender.com";
 
   const handleFileUpload = async (event) => {
@@ -16,14 +15,14 @@ export default function DataPilotDashboard() {
     if (!file) return;
     const formData = new FormData();
     formData.append('file', file);
-    
-    try {
-      setLogs(prev => [...prev, `[LOG] Uploading ${file.name}...`]);
-      const res = await axios.post(`${API_URL}/upload`, formData);
-      setLogs(prev => [...prev, `[LOG] ${res.data.message}`]);
-      setLogs(prev => [...prev, `[LOG] Dataset Loaded. Ready to run.`]);
-    } catch (err) {
-      setLogs(prev => [...prev, "[ERROR] Upload failed. Check if API is live."]);
+
+    try {  
+      setLogs(prev => [...prev, `[LOG] Uploading ${file.name}...`]);  
+      const res = await axios.post(`${API_URL}/upload`, formData);  
+      setLogs(prev => [...prev, `[LOG] ${res.data.message}`]);  
+      setLogs(prev => [...prev, `[LOG] Dataset Loaded. Ready to run.`]);  
+    } catch (err) {  
+      setLogs(prev => [...prev, "[ERROR] Upload failed. Check if API is live."]);  
     }
   };
 
@@ -32,15 +31,15 @@ export default function DataPilotDashboard() {
       setImage(null);
       setLogs(prev => [...prev, "[SYSTEM] Executing script..."]);
       const res = await axios.post(`${API_URL}/execute`, { script: code });
-      
-      if (res.data.execution_logs) {
-        setLogs(res.data.execution_logs);
-      }
-      if (res.data.visualization) {
-        setImage(`data:image/png;base64,${res.data.visualization}`);
-      }
-    } catch (err) {
-      setLogs(prev => [...prev, "[ERROR] Connection to API failed."]);
+
+      if (res.data.execution_logs) {  
+        setLogs(res.data.execution_logs);  
+      }  
+      if (res.data.visualization) {  
+        setImage(`data:image/png;base64,${res.data.visualization}`);  
+      }  
+    } catch (err) {  
+      setLogs(prev => [...prev, "[ERROR] Connection to API failed."]);  
     }
   };
 
