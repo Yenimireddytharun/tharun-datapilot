@@ -9,27 +9,25 @@ import base64
 from io import BytesIO
 import matplotlib.pyplot as plt
 
+# These must match your 'engine' folder structure
 from engine.lexer import lexer
 from engine.parser import parser
 from engine.executor import DataPilotExecutor
 
 app = FastAPI()
 
-# FIXED: Read the Allowed Origin from Environment Variables or default to all
-allowed_origins = os.getenv("CORS_ORIGIN", "*").split(",")
-
-# In your server.py file
+# FIXED: Standard CORS policy to allow your frontend
 app.add_middleware(
     CORSMiddleware,
-    # This tells the backend exactly which websites are allowed to send files
     allow_origins=[
-        "https://tharun-datapilot.onrender.com", # Your Render URL
-        "http://localhost:3000"                  # For local testing
+        "https://tharun-datapilot.onrender.com", 
+        "http://localhost:3000"                  
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 uploaded_data = None
 
 class ScriptRequest(BaseModel):
@@ -45,7 +43,6 @@ async def upload_file(file: UploadFile = File(...)):
     try:
         contents = await file.read()
         os.makedirs("data", exist_ok=True)
-        # Safe filename handling
         file_path = os.path.join("data", file.filename)
         with open(file_path, "wb") as f:
             f.write(contents)
@@ -80,6 +77,6 @@ async def execute_script(request: ScriptRequest):
         return {"status": "error", "execution_logs": [f"[ERROR] {str(e)}"], "visualization": None}
 
 if __name__ == "__main__":
-    # FIXED: Render provides a PORT environment variable. We must use it.
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    # We use "server:app" as a string to match the Uvicorn standard
+    uvicorn.run("server:app", host="0.0.0.0", port=port, reload=False)
