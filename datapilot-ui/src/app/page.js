@@ -8,7 +8,7 @@ export default function DataPilotDashboard() {
   const [logs, setLogs] = useState([]);
   const [image, setImage] = useState(null);
 
-  const API_URL = "https://tharun-datapilot-api.onrender.com";
+  const API_URL = "http://localhost:8001"
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
