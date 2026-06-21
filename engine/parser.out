@@ -6,8 +6,8 @@ Rule 0     S' -> program
 Rule 1     program -> statement_list
 Rule 2     statement_list -> statement
 Rule 3     statement_list -> statement_list statement
-Rule 4     statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN
-Rule 5     statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
+Rule 4     statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
+Rule 5     statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN
 Rule 6     statement -> LOAD STRING AS IDENTIFIER
 Rule 7     statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER
 Rule 8     statement -> PLOT IDENTIFIER AS IDENTIFIER
@@ -18,13 +18,13 @@ Rule 11    comparison -> EQUALS
 Terminals, with rules where they appear
 
 AS                   : 6 7 8
-COMMA                : 5
+COMMA                : 4
 DOT                  : 4 5
 DP                   : 4 5
 EQUALS               : 11
 FILTER               : 7
 GREATER              : 9
-IDENTIFIER           : 4 4 5 5 5 6 7 7 7 8 8
+IDENTIFIER           : 4 4 4 5 5 6 7 7 7 8 8
 LESS                 : 10
 LOAD                 : 6
 LPAREN               : 4 5
@@ -50,8 +50,8 @@ state 0
     (1) program -> . statement_list
     (2) statement_list -> . statement
     (3) statement_list -> . statement_list statement
-    (4) statement -> . DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN
-    (5) statement -> . DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
+    (4) statement -> . DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
+    (5) statement -> . DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN
     (6) statement -> . LOAD STRING AS IDENTIFIER
     (7) statement -> . FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER
     (8) statement -> . PLOT IDENTIFIER AS IDENTIFIER
@@ -75,8 +75,8 @@ state 2
 
     (1) program -> statement_list .
     (3) statement_list -> statement_list . statement
-    (4) statement -> . DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN
-    (5) statement -> . DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
+    (4) statement -> . DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
+    (5) statement -> . DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN
     (6) statement -> . LOAD STRING AS IDENTIFIER
     (7) statement -> . FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER
     (8) statement -> . PLOT IDENTIFIER AS IDENTIFIER
@@ -102,8 +102,8 @@ state 3
 
 state 4
 
-    (4) statement -> DP . DOT IDENTIFIER LPAREN IDENTIFIER RPAREN
-    (5) statement -> DP . DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
+    (4) statement -> DP . DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
+    (5) statement -> DP . DOT IDENTIFIER LPAREN IDENTIFIER RPAREN
 
     DOT             shift and go to state 9
 
@@ -142,8 +142,8 @@ state 8
 
 state 9
 
-    (4) statement -> DP DOT . IDENTIFIER LPAREN IDENTIFIER RPAREN
-    (5) statement -> DP DOT . IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
+    (4) statement -> DP DOT . IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
+    (5) statement -> DP DOT . IDENTIFIER LPAREN IDENTIFIER RPAREN
 
     IDENTIFIER      shift and go to state 13
 
@@ -171,8 +171,8 @@ state 12
 
 state 13
 
-    (4) statement -> DP DOT IDENTIFIER . LPAREN IDENTIFIER RPAREN
-    (5) statement -> DP DOT IDENTIFIER . LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
+    (4) statement -> DP DOT IDENTIFIER . LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
+    (5) statement -> DP DOT IDENTIFIER . LPAREN IDENTIFIER RPAREN
 
     LPAREN          shift and go to state 17
 
@@ -200,8 +200,8 @@ state 16
 
 state 17
 
-    (4) statement -> DP DOT IDENTIFIER LPAREN . IDENTIFIER RPAREN
-    (5) statement -> DP DOT IDENTIFIER LPAREN . IDENTIFIER COMMA IDENTIFIER RPAREN
+    (4) statement -> DP DOT IDENTIFIER LPAREN . IDENTIFIER COMMA IDENTIFIER RPAREN
+    (5) statement -> DP DOT IDENTIFIER LPAREN . IDENTIFIER RPAREN
 
     IDENTIFIER      shift and go to state 21
 
@@ -243,11 +243,11 @@ state 20
 
 state 21
 
-    (4) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER . RPAREN
-    (5) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER . COMMA IDENTIFIER RPAREN
+    (4) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER . COMMA IDENTIFIER RPAREN
+    (5) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER . RPAREN
 
-    RPAREN          shift and go to state 26
-    COMMA           shift and go to state 27
+    COMMA           shift and go to state 26
+    RPAREN          shift and go to state 27
 
 
 state 22
@@ -280,20 +280,20 @@ state 25
 
 state 26
 
-    (4) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN .
+    (4) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA . IDENTIFIER RPAREN
 
-    DP              reduce using rule 4 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN .)
-    LOAD            reduce using rule 4 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN .)
-    FILTER          reduce using rule 4 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN .)
-    PLOT            reduce using rule 4 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN .)
-    $end            reduce using rule 4 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN .)
+    IDENTIFIER      shift and go to state 29
 
 
 state 27
 
-    (5) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA . IDENTIFIER RPAREN
+    (5) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN .
 
-    IDENTIFIER      shift and go to state 29
+    DP              reduce using rule 5 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN .)
+    LOAD            reduce using rule 5 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN .)
+    FILTER          reduce using rule 5 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN .)
+    PLOT            reduce using rule 5 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN .)
+    $end            reduce using rule 5 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN .)
 
 
 state 28
@@ -305,7 +305,7 @@ state 28
 
 state 29
 
-    (5) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER . RPAREN
+    (4) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER . RPAREN
 
     RPAREN          shift and go to state 31
 
@@ -319,13 +319,13 @@ state 30
 
 state 31
 
-    (5) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN .
+    (4) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN .
 
-    DP              reduce using rule 5 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN .)
-    LOAD            reduce using rule 5 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN .)
-    FILTER          reduce using rule 5 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN .)
-    PLOT            reduce using rule 5 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN .)
-    $end            reduce using rule 5 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN .)
+    DP              reduce using rule 4 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN .)
+    LOAD            reduce using rule 4 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN .)
+    FILTER          reduce using rule 4 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN .)
+    PLOT            reduce using rule 4 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN .)
+    $end            reduce using rule 4 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN .)
 
 
 state 32

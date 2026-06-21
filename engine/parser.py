@@ -1,46 +1,73 @@
 import ply.yacc as yacc
-from engine.lexer import tokens 
-import sys
-import os 
-from engine.executor import DataPilotExecutor
+from engine.lexer import tokens
+import os
 
 def p_program(p):
     '''program : statement_list'''
     p[0] = ('PROGRAM', p[1])
 
-def p_statement_list(p):
-    '''statement_list : statement
-                  | statement_list statement'''
-    if len(p) == 2:
-        p[0] = [p[1]]
+def p_statement_list_single(p):
+    '''statement_list : statement'''
+    p[0] = [p[1]]
+
+def p_statement_list_multiple(p):
+    '''statement_list : statement_list statement'''
+    p[0] = p[1] + [p[2]]
+
+def p_statement_dp_two_args(p):
+    '''statement : DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN'''
+    func_name = p[3]
+    arg1 = p[5]
+    arg2 = p[7]
+    if func_name == 'Query':
+        p[0] = ('DP_QUERY', arg1, arg2)
+    elif func_name == 'Visualize':
+        p[0] = ('DP_VISUALIZE', arg1, arg2)
+    elif func_name == 'Train':
+        p[0] = ('DP_TRAIN', arg1, arg2)
+    elif func_name == 'Filter':
+        p[0] = ('DP_FILTER', arg1, arg2)
+    elif func_name == 'Describe':
+        p[0] = ('DP_DESCRIBE', arg1, arg2)
+    elif func_name == 'SQL':
+        p[0] = ('DP_SQL', arg1, arg2)
+    elif func_name == 'Insight':
+        p[0] = ('DP_INSIGHT', arg1, arg2)
+    elif func_name == 'Report':
+        p[0] = ('DP_REPORT', arg1, arg2)
+    elif func_name == 'Predict':
+        p[0] = ('DP_PREDICT', arg1, arg2)
     else:
-        p[0] = p[1] + [p[2]]
+        p[0] = ('DP_UNKNOWN', arg1, arg2)
 
-
-
-def p_statement_dp_logic(p):
-    '''statement : DP DOT IDENTIFIER LPAREN  IDENTIFIER RPAREN
-           | DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN'''
-    
-    
-    if len(p) == 9:
-        func_name = p[3]
-        if func_name == 'Query':
-            p[0] = ('DP_QUERY', p[5], p[7])
-        elif func_name == 'Visualize':
-            p[0] = ('DP_VISUALIZE', p[5], p[7])
-        elif func_name == 'Model':
-            p[0] = ('DP_MODEL', p[5], p[7])
-            
-    
-    elif len(p) == 7:
-        if p[3] == 'Transform':
-            p[0] = ('DP_TRANSFORM', p[5])
+def p_statement_dp_one_arg(p):
+    '''statement : DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN'''
+    func_name = p[3]
+    arg1 = p[5]
+    if func_name == 'Query':
+        p[0] = ('DP_QUERY', arg1, None)
+    elif func_name == 'Visualize':
+        p[0] = ('DP_VISUALIZE', arg1, None)
+    elif func_name == 'Train':
+        p[0] = ('DP_TRAIN', arg1, None)
+    elif func_name == 'Describe':
+        p[0] = ('DP_DESCRIBE', arg1, None)
+    elif func_name == 'Filter':
+        p[0] = ('DP_FILTER', arg1, None)
+    elif func_name == 'Insight':
+        p[0] = ('DP_INSIGHT', arg1, None)
+    elif func_name == 'Report':
+        p[0] = ('DP_REPORT', arg1, None)
+    elif func_name == 'SQL':
+        p[0] = ('DP_SQL', arg1, None)
+    elif func_name == 'Predict':
+        p[0] = ('DP_PREDICT', arg1, None)
+    else:
+        p[0] = ('DP_UNKNOWN', arg1, None)
 
 def p_statement_load(p):
     '''statement : LOAD STRING AS IDENTIFIER'''
     p[0] = ('LOAD_STMT', p[2], p[4])
-
 
 def p_statement_filter(p):
     '''statement : FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER'''
@@ -50,24 +77,16 @@ def p_statement_plot(p):
     '''statement : PLOT IDENTIFIER AS IDENTIFIER'''
     p[0] = ('PLOT_STMT', p[2], p[4])
 
-
 def p_comparison(p):
     '''comparison : GREATER
-               | LESS
-               | EQUALS'''
+                  | LESS
+                  | EQUALS'''
     p[0] = p[1]
 
-    
-   
 def p_error(p):
     if p:
-        # Use a raw string to avoid SyntaxWarnings with backslashes
-        print(r"\n[!] VALIDATION ERROR DETECTED")
-        print("-" * 50)
-        # ... your existing error printing logic ...
-        print(f"MESSAGE: Syntax error at token '{p.value}'. Check grammar rules.")
+        print(f"Syntax error at token '{p.value}'")
     else:
-        print("MESSAGE: Unexpected end of input.")
-    os._exit(0)
+        print("Unexpected end of input")
 
 parser = yacc.yacc()
