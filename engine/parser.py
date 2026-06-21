@@ -35,8 +35,6 @@ def p_statement_dp_two_args(p):
         p[0] = ('DP_INSIGHT', arg1, arg2)
     elif func_name == 'Report':
         p[0] = ('DP_REPORT', arg1, arg2)
-    elif func_name == 'Model':
-        p[0] = ('DP_MODEL', arg1, arg2)
     elif func_name == 'Predict':
         p[0] = ('DP_PREDICT', arg1, arg2)
     else:

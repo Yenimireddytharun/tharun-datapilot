@@ -17,9 +17,13 @@ class DataPilotExecutor:
         self.current_plt = None
         self.trained_model = None
         self.last_metrics = {}
+        self.last_table = []
 
     def execute(self, ast, data_override=None):
         logs = []
+        self.last_metrics = {}
+        self.last_table = []
+        self.current_plt = None
 
         if data_override is not None:
             self.data = data_override
@@ -51,7 +55,7 @@ class DataPilotExecutor:
                 chart_type = stmt[2] if len(stmt) > 2 and stmt[2] else 'bar_chart'
                 logs.append(f"{i}. Visualizing: Generating {chart_type}...")
                 self.generate_plot(chart_type)
-                logs.append("[LOG] Encoding plot to Base64... DONE.")
+                logs.append("[LOG] Chart generated. DONE.")
 
             elif action == 'DP_TRAIN':
                 target_col = stmt[2] if len(stmt) > 2 and stmt[2] else None
@@ -92,21 +96,23 @@ class DataPilotExecutor:
                         logs.append(f"[ERROR] Filter failed: {str(e)}")
 
             elif action == 'DP_SQL':
-                query = stmt[2] if len(stmt) > 2 and stmt[2] else None
+                condition = stmt[2] if len(stmt) > 2 and stmt[2] else None
                 logs.append(f"{i}. Executing SQL query...")
-                if query:
-                    try:
-                        import duckdb
-                        self.data.to_parquet('_temp_data.parquet')
-                        result_df = duckdb.query(f"SELECT * FROM read_parquet('_temp_data.parquet') WHERE {query}").df()
-                        self.data = result_df
-                        logs.append(f"[SQL] Query executed successfully.")
-                        logs.append(f"[SQL] Result: {len(self.data)} rows returned.")
-                        logs.append(f"[SQL] Columns: {list(self.data.columns)}")
-                    except Exception as e:
-                        logs.append(f"[ERROR] SQL failed: {str(e)}")
-                else:
-                    logs.append("[ERROR] No SQL condition provided.")
+                try:
+                    import duckdb
+                    self.data.to_parquet('_temp_dp.parquet')
+                    if condition and condition.lower() != 'all':
+                        sql = f"SELECT * FROM read_parquet('_temp_dp.parquet') WHERE {condition}"
+                    else:
+                        sql = "SELECT * FROM read_parquet('_temp_dp.parquet')"
+                    result_df = duckdb.query(sql).df()
+                    self.data = result_df
+                    logs.append(f"[SQL] Executed successfully.")
+                    logs.append(f"[SQL] Result: {len(self.data)} rows returned.")
+                    logs.append(f"[SQL] Columns: {list(self.data.columns)}")
+                    self.last_table = self.data.head(20).to_dict(orient='records')
+                except Exception as e:
+                    logs.append(f"[ERROR] SQL failed: {str(e)}")
 
             elif action == 'DP_INSIGHT':
                 logs.append(f"{i}. Generating AI Insights...")
@@ -144,7 +150,8 @@ class DataPilotExecutor:
             "status": "success",
             "execution_logs": logs,
             "data_preview": data_preview,
-            "metrics": self.last_metrics
+            "metrics": self.last_metrics,
+            "table": self.last_table
         }
 
     def train_model(self, target):
@@ -159,13 +166,9 @@ class DataPilotExecutor:
         if target_match is None:
             return {
                 'task': 'error',
-                'error': f"Column '{target}' not found. Available columns: {actual_cols}",
-                'metric': 'none',
-                'score': 0,
-                'features': [],
-                'precision': 'N/A',
-                'recall': 'N/A',
-                'f1': 'N/A'
+                'error': f"Column '{target}' not found. Available: {actual_cols}",
+                'metric': 'none', 'score': 0, 'features': [],
+                'precision': 'N/A', 'recall': 'N/A', 'f1': 'N/A'
             }
         target = target_match
         X = df.drop(columns=[target])
@@ -194,14 +197,8 @@ class DataPilotExecutor:
             metric = 'rmse'
         self.trained_model = model
         return {
-            'model': model,
-            'task': task,
-            'metric': metric,
-            'score': score,
-            'features': list(X.columns),
-            'precision': precision,
-            'recall': recall,
-            'f1': f1
+            'model': model, 'task': task, 'metric': metric, 'score': score,
+            'features': list(X.columns), 'precision': precision, 'recall': recall, 'f1': f1
         }
 
     def generate_feature_importance(self, result):
@@ -209,13 +206,15 @@ class DataPilotExecutor:
             model = result['model']
             features = result['features']
             importance = model.feature_importances_
-            fig, ax = plt.subplots(figsize=(7, 5))
+            fig, ax = plt.subplots(figsize=(7, 4))
             fig.patch.set_facecolor('#0f0f1a')
             ax.set_facecolor('#1a1a2e')
             ax.barh(features, importance, color='#61dafb')
-            ax.set_title("Feature Importance", color='white')
+            ax.set_title("Feature Importance", color='white', fontsize=12)
             ax.set_xlabel("Importance Score", color='white')
             ax.tick_params(colors='white')
+            for spine in ax.spines.values():
+                spine.set_edgecolor('#333')
             plt.tight_layout()
             self.current_plt = plt
         except Exception as e:
@@ -231,15 +230,18 @@ class DataPilotExecutor:
             fig = plt.figure(figsize=(14, 10))
             fig.patch.set_facecolor('#0f0f1a')
             gs = gridspec.GridSpec(2, 2, figure=fig, hspace=0.4, wspace=0.3)
-            x_col = cat_cols[0] if cat_cols else self.data.index
+            x_col = cat_cols[0] if cat_cols else None
             y_col = numeric_cols[0]
+
             ax1 = fig.add_subplot(gs[0, 0])
             ax1.set_facecolor('#1a1a2e')
-            ax1.bar(self.data[x_col].astype(str) if cat_cols else range(len(self.data)), self.data[y_col], color='#61dafb')
-            ax1.set_title(f'{y_col} by {x_col}', color='white', fontsize=10)
-            ax1.tick_params(colors='white', rotation=30)
+            if x_col:
+                ax1.bar(self.data[x_col].astype(str), self.data[y_col], color='#61dafb')
+                ax1.set_title(f'{y_col} by {x_col}', color='white', fontsize=10)
+                ax1.tick_params(colors='white', rotation=30)
             for spine in ax1.spines.values():
                 spine.set_edgecolor('#333')
+
             ax2 = fig.add_subplot(gs[0, 1])
             ax2.set_facecolor('#1a1a2e')
             ax2.plot(range(len(self.data)), self.data[y_col], marker='o', color='#ff6b6b', linewidth=2)
@@ -248,11 +250,13 @@ class DataPilotExecutor:
             ax2.tick_params(colors='white')
             for spine in ax2.spines.values():
                 spine.set_edgecolor('#333')
+
             ax3 = fig.add_subplot(gs[1, 0])
             ax3.set_facecolor('#1a1a2e')
-            if cat_cols:
+            if x_col:
                 ax3.pie(self.data[y_col], labels=self.data[x_col].astype(str), autopct='%1.1f%%', colors=colors)
             ax3.set_title(f'{y_col} Distribution', color='white', fontsize=10)
+
             ax4 = fig.add_subplot(gs[1, 1])
             ax4.set_facecolor('#1a1a2e')
             if len(numeric_cols) >= 2:
@@ -260,13 +264,14 @@ class DataPilotExecutor:
                 ax4.set_title(f'{numeric_cols[0]} vs {numeric_cols[1]}', color='white', fontsize=10)
                 ax4.set_xlabel(numeric_cols[0], color='white')
                 ax4.set_ylabel(numeric_cols[1], color='white')
-            else:
-                groups = self.data.groupby(cat_cols[0])[y_col].sum() if cat_cols else pd.Series()
+            elif x_col:
+                groups = self.data.groupby(x_col)[y_col].sum()
                 ax4.barh(groups.index.astype(str), groups.values, color='#a855f7')
-                ax4.set_title(f'Total {y_col} by {cat_cols[0]}', color='white', fontsize=10)
+                ax4.set_title(f'Total {y_col} by {x_col}', color='white', fontsize=10)
             ax4.tick_params(colors='white')
             for spine in ax4.spines.values():
                 spine.set_edgecolor('#333')
+
             plt.suptitle('DataPilot — PowerBI Dashboard', color='#61dafb', fontsize=14, fontweight='bold')
             self.current_plt = plt
         except Exception as e:
@@ -274,7 +279,7 @@ class DataPilotExecutor:
 
     def generate_plot(self, chart_type='bar_chart'):
         try:
-            fig, ax = plt.subplots(figsize=(7, 5))
+            fig, ax = plt.subplots(figsize=(8, 5))
             fig.patch.set_facecolor('#0f0f1a')
             ax.set_facecolor('#1a1a2e')
             numeric_cols = self.data.select_dtypes(include='number').columns.tolist()
@@ -286,15 +291,17 @@ class DataPilotExecutor:
                 ax.set_title(f"DataPilot: {y_col} by {x_col}", color='white')
                 ax.tick_params(colors='white', rotation=45)
             elif chart_type == 'line_chart':
-                ax.plot(self.data[x_col].astype(str), self.data[y_col], marker='o', color='#61dafb')
+                ax.plot(self.data[x_col].astype(str), self.data[y_col], marker='o', color='#ff6b6b', linewidth=2)
+                ax.fill_between(range(len(self.data)), self.data[y_col], alpha=0.2, color='#ff6b6b')
                 ax.set_title(f"DataPilot: {y_col} trend", color='white')
                 ax.tick_params(colors='white', rotation=45)
             elif chart_type == 'pie_chart':
-                ax.pie(self.data[y_col], labels=self.data[x_col].astype(str), autopct='%1.1f%%')
+                ax.pie(self.data[y_col], labels=self.data[x_col].astype(str), autopct='%1.1f%%',
+                       colors=['#61dafb','#ff6b6b','#ffd93d','#6bcb77','#a855f7'])
                 ax.set_title(f"DataPilot: {y_col} distribution", color='white')
             elif chart_type == 'scatter':
                 if len(numeric_cols) >= 2:
-                    ax.scatter(self.data[numeric_cols[0]], self.data[numeric_cols[1]], color='#61dafb')
+                    ax.scatter(self.data[numeric_cols[0]], self.data[numeric_cols[1]], color='#ffd93d', s=80)
                     ax.set_title(f"DataPilot: {numeric_cols[0]} vs {numeric_cols[1]}", color='white')
                 ax.tick_params(colors='white')
             for spine in ax.spines.values():

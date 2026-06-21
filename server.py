@@ -41,12 +41,16 @@ async def upload_file(file: UploadFile = File(...)):
         file_path = os.path.join("data", file.filename)
         with open(file_path, "wb") as f:
             f.write(contents)
-        if file.filename.endswith('.csv'):
-            uploaded_data = pd.read_csv(io.BytesIO(contents))
-        elif file.filename.endswith('.xlsx') or file.filename.endswith('.xls'):
-            uploaded_data = pd.read_excel(io.BytesIO(contents))
-        else:
-            uploaded_data = pd.read_csv(io.BytesIO(contents))
+        try:
+            if file.filename.endswith('.xlsx') or file.filename.endswith('.xls') or 'xlsx' in file.filename:
+                uploaded_data = pd.read_excel(io.BytesIO(contents))
+            else:
+                uploaded_data = pd.read_csv(io.BytesIO(contents))
+        except Exception:
+            try:
+                uploaded_data = pd.read_excel(io.BytesIO(contents))
+            except Exception:
+                uploaded_data = pd.read_csv(io.BytesIO(contents))
         uploaded_data.columns = uploaded_data.columns.str.strip()
         return {
             "message": f"Loaded {file.filename}",
@@ -76,14 +80,16 @@ async def execute_script(request: ScriptRequest):
             "execution_logs": results.get("execution_logs", []),
             "visualization": encoded_chart,
             "metrics": results.get("metrics", {}),
-            "data_preview": results.get("data_preview", [])
+            "data_preview": results.get("data_preview", []),
+            "table": results.get("table", [])
         }
     except Exception as e:
         return {
             "status": "error",
             "execution_logs": [f"[ERROR] {str(e)}"],
             "visualization": None,
-            "metrics": {}
+            "metrics": {},
+            "table": []
         }
 
 if __name__ == "__main__":
