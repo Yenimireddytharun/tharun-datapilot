@@ -9,21 +9,15 @@ import base64
 from io import BytesIO
 import matplotlib.pyplot as plt
 
-# Imports from your engine folder
 from engine.lexer import lexer
 from engine.parser import parser
 from engine.executor import DataPilotExecutor
 
 app = FastAPI()
 
-# Robust CORS policy
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://tharun-datapilot.onrender.com",
-        "http://localhost:3000",
-        os.getenv("FRONTEND_URL", "*")
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -47,8 +41,18 @@ async def upload_file(file: UploadFile = File(...)):
         file_path = os.path.join("data", file.filename)
         with open(file_path, "wb") as f:
             f.write(contents)
-        uploaded_data = pd.read_csv(io.BytesIO(contents))
-        return {"message": f"Loaded {file.filename}", "columns": list(uploaded_data.columns)}
+        if file.filename.endswith('.csv'):
+            uploaded_data = pd.read_csv(io.BytesIO(contents))
+        elif file.filename.endswith('.xlsx') or file.filename.endswith('.xls'):
+            uploaded_data = pd.read_excel(io.BytesIO(contents))
+        else:
+            uploaded_data = pd.read_csv(io.BytesIO(contents))
+        uploaded_data.columns = uploaded_data.columns.str.strip()
+        return {
+            "message": f"Loaded {file.filename}",
+            "columns": list(uploaded_data.columns),
+            "rows": len(uploaded_data)
+        }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -60,23 +64,28 @@ async def execute_script(request: ScriptRequest):
         ast = parser.parse(request.script, lexer=lexer)
         executor = DataPilotExecutor()
         results = executor.execute(ast, data_override=uploaded_data)
-
-        encoded_chart = None  
-        if hasattr(executor, 'current_plt') and executor.current_plt:  
-            buf = BytesIO()  
-            executor.current_plt.savefig(buf, format='png', bbox_inches='tight')  
-            buf.seek(0)  
-            encoded_chart = base64.b64encode(buf.read()).decode('utf-8')  
-            executor.current_plt.close('all')   
-
-        return {  
-            "status": "success",  
-            "execution_logs": results.get("execution_logs", []),  
-            "visualization": encoded_chart  
-        }  
-    except Exception as e:  
-        return {"status": "error", "execution_logs": [f"[ERROR] {str(e)}"], "visualization": None}
+        encoded_chart = None
+        if hasattr(executor, 'current_plt') and executor.current_plt:
+            buf = BytesIO()
+            executor.current_plt.savefig(buf, format='png', bbox_inches='tight', facecolor='#0f0f1a')
+            buf.seek(0)
+            encoded_chart = base64.b64encode(buf.read()).decode('utf-8')
+            plt.close('all')
+        return {
+            "status": "success",
+            "execution_logs": results.get("execution_logs", []),
+            "visualization": encoded_chart,
+            "metrics": results.get("metrics", {}),
+            "data_preview": results.get("data_preview", [])
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "execution_logs": [f"[ERROR] {str(e)}"],
+            "visualization": None,
+            "metrics": {}
+        }
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
+    port = int(os.environ.get("PORT", 8001))
     uvicorn.run("server:app", host="0.0.0.0", port=port)

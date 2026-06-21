@@ -3,6 +3,7 @@ import base64
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -15,6 +16,7 @@ class DataPilotExecutor:
         self.data = pd.DataFrame()
         self.current_plt = None
         self.trained_model = None
+        self.last_metrics = {}
 
     def execute(self, ast, data_override=None):
         logs = []
@@ -69,6 +71,15 @@ class DataPilotExecutor:
                         logs.append(f"[LOG] F1 Score: {result['f1']}")
                     logs.append(f"[LOG] Features: {result['features']}")
                     logs.append("[LOG] Model training COMPLETE.")
+                    self.last_metrics = {
+                        'Task': result['task'],
+                        result['metric'].upper(): str(result['score']),
+                        'Features': str(len(result['features']))
+                    }
+                    if result['task'] == 'classification':
+                        self.last_metrics['Precision'] = str(result['precision'])
+                        self.last_metrics['Recall'] = str(result['recall'])
+                        self.last_metrics['F1'] = str(result['f1'])
                     self.generate_feature_importance(result)
 
             elif action == 'DP_FILTER':
@@ -80,10 +91,60 @@ class DataPilotExecutor:
                     except Exception as e:
                         logs.append(f"[ERROR] Filter failed: {str(e)}")
 
+            elif action == 'DP_SQL':
+                query = stmt[2] if len(stmt) > 2 and stmt[2] else None
+                logs.append(f"{i}. Executing SQL query...")
+                if query:
+                    try:
+                        import duckdb
+                        self.data.to_parquet('_temp_data.parquet')
+                        result_df = duckdb.query(f"SELECT * FROM read_parquet('_temp_data.parquet') WHERE {query}").df()
+                        self.data = result_df
+                        logs.append(f"[SQL] Query executed successfully.")
+                        logs.append(f"[SQL] Result: {len(self.data)} rows returned.")
+                        logs.append(f"[SQL] Columns: {list(self.data.columns)}")
+                    except Exception as e:
+                        logs.append(f"[ERROR] SQL failed: {str(e)}")
+                else:
+                    logs.append("[ERROR] No SQL condition provided.")
+
+            elif action == 'DP_INSIGHT':
+                logs.append(f"{i}. Generating AI Insights...")
+                try:
+                    numeric_cols = self.data.select_dtypes(include='number').columns.tolist()
+                    cat_cols = self.data.select_dtypes(include='object').columns.tolist()
+                    logs.append(f"[AI] Dataset: {len(self.data)} rows, {len(self.data.columns)} columns.")
+                    logs.append(f"[AI] Numeric columns: {numeric_cols}")
+                    logs.append(f"[AI] Category columns: {cat_cols}")
+                    for col in numeric_cols:
+                        mean_val = round(self.data[col].mean(), 2)
+                        max_val = self.data[col].max()
+                        min_val = self.data[col].min()
+                        std_val = round(self.data[col].std(), 2)
+                        logs.append(f"[AI] {col} → Mean: {mean_val}, Max: {max_val}, Min: {min_val}, Std: {std_val}")
+                    if numeric_cols and cat_cols:
+                        top = self.data.groupby(cat_cols[0])[numeric_cols[0]].sum().idxmax()
+                        top_val = self.data.groupby(cat_cols[0])[numeric_cols[0]].sum().max()
+                        logs.append(f"[AI] Top performer in {cat_cols[0]}: {top} with {numeric_cols[0]} = {top_val}")
+                        bottom = self.data.groupby(cat_cols[0])[numeric_cols[0]].sum().idxmin()
+                        logs.append(f"[AI] Lowest performer: {bottom}")
+                    logs.append("[AI] Insight generation COMPLETE.")
+                except Exception as e:
+                    logs.append(f"[ERROR] Insight failed: {str(e)}")
+
+            elif action == 'DP_REPORT':
+                logs.append(f"{i}. Generating PowerBI Dashboard...")
+                try:
+                    self.generate_powerbi_dashboard()
+                    logs.append("[LOG] PowerBI Dashboard generated. DONE.")
+                except Exception as e:
+                    logs.append(f"[ERROR] Report failed: {str(e)}")
+
         return {
             "status": "success",
             "execution_logs": logs,
-            "data_preview": data_preview
+            "data_preview": data_preview,
+            "metrics": self.last_metrics
         }
 
     def train_model(self, target):
@@ -148,37 +209,96 @@ class DataPilotExecutor:
             model = result['model']
             features = result['features']
             importance = model.feature_importances_
-            plt.figure(figsize=(7, 5))
-            plt.barh(features, importance, color='#61dafb')
-            plt.title("Feature Importance")
-            plt.xlabel("Importance Score")
+            fig, ax = plt.subplots(figsize=(7, 5))
+            fig.patch.set_facecolor('#0f0f1a')
+            ax.set_facecolor('#1a1a2e')
+            ax.barh(features, importance, color='#61dafb')
+            ax.set_title("Feature Importance", color='white')
+            ax.set_xlabel("Importance Score", color='white')
+            ax.tick_params(colors='white')
             plt.tight_layout()
             self.current_plt = plt
         except Exception as e:
             print(f"Feature importance error: {e}")
 
+    def generate_powerbi_dashboard(self):
+        try:
+            numeric_cols = self.data.select_dtypes(include='number').columns.tolist()
+            cat_cols = self.data.select_dtypes(include='object').columns.tolist()
+            if not numeric_cols:
+                return
+            colors = ['#61dafb', '#ff6b6b', '#ffd93d', '#6bcb77', '#a855f7']
+            fig = plt.figure(figsize=(14, 10))
+            fig.patch.set_facecolor('#0f0f1a')
+            gs = gridspec.GridSpec(2, 2, figure=fig, hspace=0.4, wspace=0.3)
+            x_col = cat_cols[0] if cat_cols else self.data.index
+            y_col = numeric_cols[0]
+            ax1 = fig.add_subplot(gs[0, 0])
+            ax1.set_facecolor('#1a1a2e')
+            ax1.bar(self.data[x_col].astype(str) if cat_cols else range(len(self.data)), self.data[y_col], color='#61dafb')
+            ax1.set_title(f'{y_col} by {x_col}', color='white', fontsize=10)
+            ax1.tick_params(colors='white', rotation=30)
+            for spine in ax1.spines.values():
+                spine.set_edgecolor('#333')
+            ax2 = fig.add_subplot(gs[0, 1])
+            ax2.set_facecolor('#1a1a2e')
+            ax2.plot(range(len(self.data)), self.data[y_col], marker='o', color='#ff6b6b', linewidth=2)
+            ax2.fill_between(range(len(self.data)), self.data[y_col], alpha=0.2, color='#ff6b6b')
+            ax2.set_title(f'{y_col} Trend', color='white', fontsize=10)
+            ax2.tick_params(colors='white')
+            for spine in ax2.spines.values():
+                spine.set_edgecolor('#333')
+            ax3 = fig.add_subplot(gs[1, 0])
+            ax3.set_facecolor('#1a1a2e')
+            if cat_cols:
+                ax3.pie(self.data[y_col], labels=self.data[x_col].astype(str), autopct='%1.1f%%', colors=colors)
+            ax3.set_title(f'{y_col} Distribution', color='white', fontsize=10)
+            ax4 = fig.add_subplot(gs[1, 1])
+            ax4.set_facecolor('#1a1a2e')
+            if len(numeric_cols) >= 2:
+                ax4.scatter(self.data[numeric_cols[0]], self.data[numeric_cols[1]], color='#ffd93d', s=100, alpha=0.8)
+                ax4.set_title(f'{numeric_cols[0]} vs {numeric_cols[1]}', color='white', fontsize=10)
+                ax4.set_xlabel(numeric_cols[0], color='white')
+                ax4.set_ylabel(numeric_cols[1], color='white')
+            else:
+                groups = self.data.groupby(cat_cols[0])[y_col].sum() if cat_cols else pd.Series()
+                ax4.barh(groups.index.astype(str), groups.values, color='#a855f7')
+                ax4.set_title(f'Total {y_col} by {cat_cols[0]}', color='white', fontsize=10)
+            ax4.tick_params(colors='white')
+            for spine in ax4.spines.values():
+                spine.set_edgecolor('#333')
+            plt.suptitle('DataPilot — PowerBI Dashboard', color='#61dafb', fontsize=14, fontweight='bold')
+            self.current_plt = plt
+        except Exception as e:
+            print(f"PowerBI dashboard error: {e}")
+
     def generate_plot(self, chart_type='bar_chart'):
         try:
-            plt.figure(figsize=(7, 5))
+            fig, ax = plt.subplots(figsize=(7, 5))
+            fig.patch.set_facecolor('#0f0f1a')
+            ax.set_facecolor('#1a1a2e')
             numeric_cols = self.data.select_dtypes(include='number').columns.tolist()
             cat_cols = self.data.select_dtypes(include='object').columns.tolist()
             x_col = cat_cols[0] if cat_cols else self.data.columns[0]
             y_col = numeric_cols[0] if numeric_cols else self.data.columns[1]
             if chart_type == 'bar_chart':
-                plt.bar(self.data[x_col].astype(str), self.data[y_col], color='#61dafb')
-                plt.title(f"DataPilot: {y_col} by {x_col}")
-                plt.xticks(rotation=45)
+                ax.bar(self.data[x_col].astype(str), self.data[y_col], color='#61dafb')
+                ax.set_title(f"DataPilot: {y_col} by {x_col}", color='white')
+                ax.tick_params(colors='white', rotation=45)
             elif chart_type == 'line_chart':
-                plt.plot(self.data[x_col].astype(str), self.data[y_col], marker='o', color='#61dafb')
-                plt.title(f"DataPilot: {y_col} trend")
-                plt.xticks(rotation=45)
+                ax.plot(self.data[x_col].astype(str), self.data[y_col], marker='o', color='#61dafb')
+                ax.set_title(f"DataPilot: {y_col} trend", color='white')
+                ax.tick_params(colors='white', rotation=45)
             elif chart_type == 'pie_chart':
-                plt.pie(self.data[y_col], labels=self.data[x_col].astype(str), autopct='%1.1f%%')
-                plt.title(f"DataPilot: {y_col} distribution")
+                ax.pie(self.data[y_col], labels=self.data[x_col].astype(str), autopct='%1.1f%%')
+                ax.set_title(f"DataPilot: {y_col} distribution", color='white')
             elif chart_type == 'scatter':
                 if len(numeric_cols) >= 2:
-                    plt.scatter(self.data[numeric_cols[0]], self.data[numeric_cols[1]], color='#61dafb')
-                    plt.title(f"DataPilot: {numeric_cols[0]} vs {numeric_cols[1]}")
+                    ax.scatter(self.data[numeric_cols[0]], self.data[numeric_cols[1]], color='#61dafb')
+                    ax.set_title(f"DataPilot: {numeric_cols[0]} vs {numeric_cols[1]}", color='white')
+                ax.tick_params(colors='white')
+            for spine in ax.spines.values():
+                spine.set_edgecolor('#333')
             plt.tight_layout()
             self.current_plt = plt
         except Exception as e:

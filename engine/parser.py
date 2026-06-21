@@ -29,8 +29,16 @@ def p_statement_dp_two_args(p):
         p[0] = ('DP_FILTER', arg1, arg2)
     elif func_name == 'Describe':
         p[0] = ('DP_DESCRIBE', arg1, arg2)
+    elif func_name == 'SQL':
+        p[0] = ('DP_SQL', arg1, arg2)
+    elif func_name == 'Insight':
+        p[0] = ('DP_INSIGHT', arg1, arg2)
+    elif func_name == 'Report':
+        p[0] = ('DP_REPORT', arg1, arg2)
     elif func_name == 'Model':
         p[0] = ('DP_MODEL', arg1, arg2)
+    elif func_name == 'Predict':
+        p[0] = ('DP_PREDICT', arg1, arg2)
     else:
         p[0] = ('DP_UNKNOWN', arg1, arg2)
 
@@ -48,6 +56,14 @@ def p_statement_dp_one_arg(p):
         p[0] = ('DP_DESCRIBE', arg1, None)
     elif func_name == 'Filter':
         p[0] = ('DP_FILTER', arg1, None)
+    elif func_name == 'Insight':
+        p[0] = ('DP_INSIGHT', arg1, None)
+    elif func_name == 'Report':
+        p[0] = ('DP_REPORT', arg1, None)
+    elif func_name == 'SQL':
+        p[0] = ('DP_SQL', arg1, None)
+    elif func_name == 'Predict':
+        p[0] = ('DP_PREDICT', arg1, None)
     else:
         p[0] = ('DP_UNKNOWN', arg1, None)
 
