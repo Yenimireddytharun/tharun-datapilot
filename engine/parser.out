@@ -8,36 +8,38 @@ Rule 2     statement_list -> statement
 Rule 3     statement_list -> statement_list statement
 Rule 4     statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
 Rule 5     statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN
-Rule 6     statement -> LOAD STRING AS IDENTIFIER
-Rule 7     statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER
-Rule 8     statement -> PLOT IDENTIFIER AS IDENTIFIER
-Rule 9     comparison -> GREATER
-Rule 10    comparison -> LESS
-Rule 11    comparison -> EQUALS
+Rule 6     statement -> DP DOT IDENTIFIER LPAREN STRING RPAREN
+Rule 7     statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA STRING RPAREN
+Rule 8     statement -> LOAD STRING AS IDENTIFIER
+Rule 9     statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER
+Rule 10    statement -> PLOT IDENTIFIER AS IDENTIFIER
+Rule 11    comparison -> GREATER
+Rule 12    comparison -> LESS
+Rule 13    comparison -> EQUALS
 
 Terminals, with rules where they appear
 
-AS                   : 6 7 8
-COMMA                : 4
-DOT                  : 4 5
-DP                   : 4 5
-EQUALS               : 11
-FILTER               : 7
-GREATER              : 9
-IDENTIFIER           : 4 4 4 5 5 6 7 7 7 8 8
-LESS                 : 10
-LOAD                 : 6
-LPAREN               : 4 5
-NUMBER               : 7
-PLOT                 : 8
-RPAREN               : 4 5
-STRING               : 6
-WHERE                : 7
+AS                   : 8 9 10
+COMMA                : 4 7
+DOT                  : 4 5 6 7
+DP                   : 4 5 6 7
+EQUALS               : 13
+FILTER               : 9
+GREATER              : 11
+IDENTIFIER           : 4 4 4 5 5 6 7 7 8 9 9 9 10 10
+LESS                 : 12
+LOAD                 : 8
+LPAREN               : 4 5 6 7
+NUMBER               : 9
+PLOT                 : 10
+RPAREN               : 4 5 6 7
+STRING               : 6 7 8
+WHERE                : 9
 error                : 
 
 Nonterminals, with rules where they appear
 
-comparison           : 7
+comparison           : 9
 program              : 0
 statement            : 2 3
 statement_list       : 1 3
@@ -52,9 +54,11 @@ state 0
     (3) statement_list -> . statement_list statement
     (4) statement -> . DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
     (5) statement -> . DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN
-    (6) statement -> . LOAD STRING AS IDENTIFIER
-    (7) statement -> . FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER
-    (8) statement -> . PLOT IDENTIFIER AS IDENTIFIER
+    (6) statement -> . DP DOT IDENTIFIER LPAREN STRING RPAREN
+    (7) statement -> . DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA STRING RPAREN
+    (8) statement -> . LOAD STRING AS IDENTIFIER
+    (9) statement -> . FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER
+    (10) statement -> . PLOT IDENTIFIER AS IDENTIFIER
 
     DP              shift and go to state 4
     LOAD            shift and go to state 5
@@ -77,9 +81,11 @@ state 2
     (3) statement_list -> statement_list . statement
     (4) statement -> . DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
     (5) statement -> . DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN
-    (6) statement -> . LOAD STRING AS IDENTIFIER
-    (7) statement -> . FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER
-    (8) statement -> . PLOT IDENTIFIER AS IDENTIFIER
+    (6) statement -> . DP DOT IDENTIFIER LPAREN STRING RPAREN
+    (7) statement -> . DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA STRING RPAREN
+    (8) statement -> . LOAD STRING AS IDENTIFIER
+    (9) statement -> . FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER
+    (10) statement -> . PLOT IDENTIFIER AS IDENTIFIER
 
     $end            reduce using rule 1 (program -> statement_list .)
     DP              shift and go to state 4
@@ -104,27 +110,29 @@ state 4
 
     (4) statement -> DP . DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
     (5) statement -> DP . DOT IDENTIFIER LPAREN IDENTIFIER RPAREN
+    (6) statement -> DP . DOT IDENTIFIER LPAREN STRING RPAREN
+    (7) statement -> DP . DOT IDENTIFIER LPAREN IDENTIFIER COMMA STRING RPAREN
 
     DOT             shift and go to state 9
 
 
 state 5
 
-    (6) statement -> LOAD . STRING AS IDENTIFIER
+    (8) statement -> LOAD . STRING AS IDENTIFIER
 
     STRING          shift and go to state 10
 
 
 state 6
 
-    (7) statement -> FILTER . IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER
+    (9) statement -> FILTER . IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER
 
     IDENTIFIER      shift and go to state 11
 
 
 state 7
 
-    (8) statement -> PLOT . IDENTIFIER AS IDENTIFIER
+    (10) statement -> PLOT . IDENTIFIER AS IDENTIFIER
 
     IDENTIFIER      shift and go to state 12
 
@@ -144,27 +152,29 @@ state 9
 
     (4) statement -> DP DOT . IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
     (5) statement -> DP DOT . IDENTIFIER LPAREN IDENTIFIER RPAREN
+    (6) statement -> DP DOT . IDENTIFIER LPAREN STRING RPAREN
+    (7) statement -> DP DOT . IDENTIFIER LPAREN IDENTIFIER COMMA STRING RPAREN
 
     IDENTIFIER      shift and go to state 13
 
 
 state 10
 
-    (6) statement -> LOAD STRING . AS IDENTIFIER
+    (8) statement -> LOAD STRING . AS IDENTIFIER
 
     AS              shift and go to state 14
 
 
 state 11
 
-    (7) statement -> FILTER IDENTIFIER . WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER
+    (9) statement -> FILTER IDENTIFIER . WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER
 
     WHERE           shift and go to state 15
 
 
 state 12
 
-    (8) statement -> PLOT IDENTIFIER . AS IDENTIFIER
+    (10) statement -> PLOT IDENTIFIER . AS IDENTIFIER
 
     AS              shift and go to state 16
 
@@ -173,27 +183,29 @@ state 13
 
     (4) statement -> DP DOT IDENTIFIER . LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN
     (5) statement -> DP DOT IDENTIFIER . LPAREN IDENTIFIER RPAREN
+    (6) statement -> DP DOT IDENTIFIER . LPAREN STRING RPAREN
+    (7) statement -> DP DOT IDENTIFIER . LPAREN IDENTIFIER COMMA STRING RPAREN
 
     LPAREN          shift and go to state 17
 
 
 state 14
 
-    (6) statement -> LOAD STRING AS . IDENTIFIER
+    (8) statement -> LOAD STRING AS . IDENTIFIER
 
     IDENTIFIER      shift and go to state 18
 
 
 state 15
 
-    (7) statement -> FILTER IDENTIFIER WHERE . IDENTIFIER comparison NUMBER AS IDENTIFIER
+    (9) statement -> FILTER IDENTIFIER WHERE . IDENTIFIER comparison NUMBER AS IDENTIFIER
 
     IDENTIFIER      shift and go to state 19
 
 
 state 16
 
-    (8) statement -> PLOT IDENTIFIER AS . IDENTIFIER
+    (10) statement -> PLOT IDENTIFIER AS . IDENTIFIER
 
     IDENTIFIER      shift and go to state 20
 
@@ -202,90 +214,103 @@ state 17
 
     (4) statement -> DP DOT IDENTIFIER LPAREN . IDENTIFIER COMMA IDENTIFIER RPAREN
     (5) statement -> DP DOT IDENTIFIER LPAREN . IDENTIFIER RPAREN
+    (6) statement -> DP DOT IDENTIFIER LPAREN . STRING RPAREN
+    (7) statement -> DP DOT IDENTIFIER LPAREN . IDENTIFIER COMMA STRING RPAREN
 
     IDENTIFIER      shift and go to state 21
+    STRING          shift and go to state 22
 
 
 state 18
 
-    (6) statement -> LOAD STRING AS IDENTIFIER .
+    (8) statement -> LOAD STRING AS IDENTIFIER .
 
-    DP              reduce using rule 6 (statement -> LOAD STRING AS IDENTIFIER .)
-    LOAD            reduce using rule 6 (statement -> LOAD STRING AS IDENTIFIER .)
-    FILTER          reduce using rule 6 (statement -> LOAD STRING AS IDENTIFIER .)
-    PLOT            reduce using rule 6 (statement -> LOAD STRING AS IDENTIFIER .)
-    $end            reduce using rule 6 (statement -> LOAD STRING AS IDENTIFIER .)
+    DP              reduce using rule 8 (statement -> LOAD STRING AS IDENTIFIER .)
+    LOAD            reduce using rule 8 (statement -> LOAD STRING AS IDENTIFIER .)
+    FILTER          reduce using rule 8 (statement -> LOAD STRING AS IDENTIFIER .)
+    PLOT            reduce using rule 8 (statement -> LOAD STRING AS IDENTIFIER .)
+    $end            reduce using rule 8 (statement -> LOAD STRING AS IDENTIFIER .)
 
 
 state 19
 
-    (7) statement -> FILTER IDENTIFIER WHERE IDENTIFIER . comparison NUMBER AS IDENTIFIER
-    (9) comparison -> . GREATER
-    (10) comparison -> . LESS
-    (11) comparison -> . EQUALS
+    (9) statement -> FILTER IDENTIFIER WHERE IDENTIFIER . comparison NUMBER AS IDENTIFIER
+    (11) comparison -> . GREATER
+    (12) comparison -> . LESS
+    (13) comparison -> . EQUALS
 
-    GREATER         shift and go to state 23
-    LESS            shift and go to state 24
-    EQUALS          shift and go to state 25
+    GREATER         shift and go to state 24
+    LESS            shift and go to state 25
+    EQUALS          shift and go to state 26
 
-    comparison                     shift and go to state 22
+    comparison                     shift and go to state 23
 
 state 20
 
-    (8) statement -> PLOT IDENTIFIER AS IDENTIFIER .
+    (10) statement -> PLOT IDENTIFIER AS IDENTIFIER .
 
-    DP              reduce using rule 8 (statement -> PLOT IDENTIFIER AS IDENTIFIER .)
-    LOAD            reduce using rule 8 (statement -> PLOT IDENTIFIER AS IDENTIFIER .)
-    FILTER          reduce using rule 8 (statement -> PLOT IDENTIFIER AS IDENTIFIER .)
-    PLOT            reduce using rule 8 (statement -> PLOT IDENTIFIER AS IDENTIFIER .)
-    $end            reduce using rule 8 (statement -> PLOT IDENTIFIER AS IDENTIFIER .)
+    DP              reduce using rule 10 (statement -> PLOT IDENTIFIER AS IDENTIFIER .)
+    LOAD            reduce using rule 10 (statement -> PLOT IDENTIFIER AS IDENTIFIER .)
+    FILTER          reduce using rule 10 (statement -> PLOT IDENTIFIER AS IDENTIFIER .)
+    PLOT            reduce using rule 10 (statement -> PLOT IDENTIFIER AS IDENTIFIER .)
+    $end            reduce using rule 10 (statement -> PLOT IDENTIFIER AS IDENTIFIER .)
 
 
 state 21
 
     (4) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER . COMMA IDENTIFIER RPAREN
     (5) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER . RPAREN
+    (7) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER . COMMA STRING RPAREN
 
-    COMMA           shift and go to state 26
-    RPAREN          shift and go to state 27
+    COMMA           shift and go to state 27
+    RPAREN          shift and go to state 28
 
 
 state 22
 
-    (7) statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison . NUMBER AS IDENTIFIER
+    (6) statement -> DP DOT IDENTIFIER LPAREN STRING . RPAREN
 
-    NUMBER          shift and go to state 28
+    RPAREN          shift and go to state 29
 
 
 state 23
 
-    (9) comparison -> GREATER .
+    (9) statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison . NUMBER AS IDENTIFIER
 
-    NUMBER          reduce using rule 9 (comparison -> GREATER .)
+    NUMBER          shift and go to state 30
 
 
 state 24
 
-    (10) comparison -> LESS .
+    (11) comparison -> GREATER .
 
-    NUMBER          reduce using rule 10 (comparison -> LESS .)
+    NUMBER          reduce using rule 11 (comparison -> GREATER .)
 
 
 state 25
 
-    (11) comparison -> EQUALS .
+    (12) comparison -> LESS .
 
-    NUMBER          reduce using rule 11 (comparison -> EQUALS .)
+    NUMBER          reduce using rule 12 (comparison -> LESS .)
 
 
 state 26
 
-    (4) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA . IDENTIFIER RPAREN
+    (13) comparison -> EQUALS .
 
-    IDENTIFIER      shift and go to state 29
+    NUMBER          reduce using rule 13 (comparison -> EQUALS .)
 
 
 state 27
+
+    (4) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA . IDENTIFIER RPAREN
+    (7) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA . STRING RPAREN
+
+    IDENTIFIER      shift and go to state 31
+    STRING          shift and go to state 32
+
+
+state 28
 
     (5) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN .
 
@@ -296,28 +321,46 @@ state 27
     $end            reduce using rule 5 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN .)
 
 
-state 28
-
-    (7) statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER . AS IDENTIFIER
-
-    AS              shift and go to state 30
-
-
 state 29
 
-    (4) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER . RPAREN
+    (6) statement -> DP DOT IDENTIFIER LPAREN STRING RPAREN .
 
-    RPAREN          shift and go to state 31
+    DP              reduce using rule 6 (statement -> DP DOT IDENTIFIER LPAREN STRING RPAREN .)
+    LOAD            reduce using rule 6 (statement -> DP DOT IDENTIFIER LPAREN STRING RPAREN .)
+    FILTER          reduce using rule 6 (statement -> DP DOT IDENTIFIER LPAREN STRING RPAREN .)
+    PLOT            reduce using rule 6 (statement -> DP DOT IDENTIFIER LPAREN STRING RPAREN .)
+    $end            reduce using rule 6 (statement -> DP DOT IDENTIFIER LPAREN STRING RPAREN .)
 
 
 state 30
 
-    (7) statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS . IDENTIFIER
+    (9) statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER . AS IDENTIFIER
 
-    IDENTIFIER      shift and go to state 32
+    AS              shift and go to state 33
 
 
 state 31
+
+    (4) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER . RPAREN
+
+    RPAREN          shift and go to state 34
+
+
+state 32
+
+    (7) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA STRING . RPAREN
+
+    RPAREN          shift and go to state 35
+
+
+state 33
+
+    (9) statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS . IDENTIFIER
+
+    IDENTIFIER      shift and go to state 36
+
+
+state 34
 
     (4) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN .
 
@@ -328,13 +371,24 @@ state 31
     $end            reduce using rule 4 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN .)
 
 
-state 32
+state 35
 
-    (7) statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER .
+    (7) statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA STRING RPAREN .
 
-    DP              reduce using rule 7 (statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER .)
-    LOAD            reduce using rule 7 (statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER .)
-    FILTER          reduce using rule 7 (statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER .)
-    PLOT            reduce using rule 7 (statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER .)
-    $end            reduce using rule 7 (statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER .)
+    DP              reduce using rule 7 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA STRING RPAREN .)
+    LOAD            reduce using rule 7 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA STRING RPAREN .)
+    FILTER          reduce using rule 7 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA STRING RPAREN .)
+    PLOT            reduce using rule 7 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA STRING RPAREN .)
+    $end            reduce using rule 7 (statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA STRING RPAREN .)
+
+
+state 36
+
+    (9) statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER .
+
+    DP              reduce using rule 9 (statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER .)
+    LOAD            reduce using rule 9 (statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER .)
+    FILTER          reduce using rule 9 (statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER .)
+    PLOT            reduce using rule 9 (statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER .)
+    $end            reduce using rule 9 (statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER .)
 

@@ -1,11 +1,13 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import uvicorn
 import pandas as pd
 import io
 import os
 import base64
+import math
 from io import BytesIO
 import matplotlib.pyplot as plt
 
@@ -27,6 +29,23 @@ uploaded_data = None
 
 class ScriptRequest(BaseModel):
     script: str
+
+def clean_json(obj):
+    if isinstance(obj, dict):
+        return {k: clean_json(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [clean_json(i) for i in obj]
+    elif isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return 0.0
+        return obj
+    elif isinstance(obj, (int, str, bool)) or obj is None:
+        return obj
+    else:
+        try:
+            return str(obj)
+        except:
+            return None
 
 @app.get("/")
 async def health_check():
@@ -68,6 +87,8 @@ async def execute_script(request: ScriptRequest):
         ast = parser.parse(request.script, lexer=lexer)
         executor = DataPilotExecutor()
         results = executor.execute(ast, data_override=uploaded_data)
+        if executor.data is not None and not executor.data.empty:
+            uploaded_data = executor.data
         encoded_chart = None
         if hasattr(executor, 'current_plt') and executor.current_plt:
             buf = BytesIO()
@@ -75,7 +96,7 @@ async def execute_script(request: ScriptRequest):
             buf.seek(0)
             encoded_chart = base64.b64encode(buf.read()).decode('utf-8')
             plt.close('all')
-        return {
+        response_data = {
             "status": "success",
             "execution_logs": results.get("execution_logs", []),
             "visualization": encoded_chart,
@@ -83,14 +104,15 @@ async def execute_script(request: ScriptRequest):
             "data_preview": results.get("data_preview", []),
             "table": results.get("table", [])
         }
+        return JSONResponse(content=clean_json(response_data))
     except Exception as e:
-        return {
+        return JSONResponse(content={
             "status": "error",
             "execution_logs": [f"[ERROR] {str(e)}"],
             "visualization": None,
             "metrics": {},
             "table": []
-        }
+        })
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8001))

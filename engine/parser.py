@@ -19,12 +19,16 @@ def p_statement_dp_two_args(p):
     func_name = p[3]
     arg1 = p[5]
     arg2 = p[7]
+    model_keywords = ['rf', 'dt', 'gb', 'lr', 'xgb', 'auto', 'cluster']
     if func_name == 'Query':
         p[0] = ('DP_QUERY', arg1, arg2)
     elif func_name == 'Visualize':
         p[0] = ('DP_VISUALIZE', arg1, arg2)
     elif func_name == 'Train':
-        p[0] = ('DP_TRAIN', arg1, arg2)
+        if arg2.lower() in model_keywords:
+            p[0] = ('DP_TRAIN', arg1, None, arg2)
+        else:
+            p[0] = ('DP_TRAIN', arg1, arg2, 'auto')
     elif func_name == 'Filter':
         p[0] = ('DP_FILTER', arg1, arg2)
     elif func_name == 'Describe':
@@ -37,6 +41,14 @@ def p_statement_dp_two_args(p):
         p[0] = ('DP_REPORT', arg1, arg2)
     elif func_name == 'Predict':
         p[0] = ('DP_PREDICT', arg1, arg2)
+    elif func_name == 'Summarize':
+        p[0] = ('DP_SUMMARIZE', arg1, arg2)
+    elif func_name == 'Kaggle':
+        p[0] = ('DP_KAGGLE', arg1, arg2)
+    elif func_name == 'Extract':
+        p[0] = ('DP_EXTRACT', arg1, arg2)
+    elif func_name == 'SQLCreate':
+        p[0] = ('DP_SQLCREATE', arg1, arg2)
     else:
         p[0] = ('DP_UNKNOWN', arg1, arg2)
 
@@ -44,12 +56,16 @@ def p_statement_dp_one_arg(p):
     '''statement : DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN'''
     func_name = p[3]
     arg1 = p[5]
+    model_keywords = ['rf', 'dt', 'gb', 'lr', 'xgb', 'auto', 'cluster']
     if func_name == 'Query':
         p[0] = ('DP_QUERY', arg1, None)
     elif func_name == 'Visualize':
         p[0] = ('DP_VISUALIZE', arg1, None)
     elif func_name == 'Train':
-        p[0] = ('DP_TRAIN', arg1, None)
+        if arg1.lower() in model_keywords:
+            p[0] = ('DP_TRAIN', 'data', None, arg1)
+        else:
+            p[0] = ('DP_TRAIN', arg1, None, 'auto')
     elif func_name == 'Describe':
         p[0] = ('DP_DESCRIBE', arg1, None)
     elif func_name == 'Filter':
@@ -62,8 +78,49 @@ def p_statement_dp_one_arg(p):
         p[0] = ('DP_SQL', arg1, None)
     elif func_name == 'Predict':
         p[0] = ('DP_PREDICT', arg1, None)
+    elif func_name == 'Summarize':
+        p[0] = ('DP_SUMMARIZE', arg1, None)
+    elif func_name == 'Kaggle':
+        p[0] = ('DP_KAGGLE', arg1, None)
+    elif func_name == 'Extract':
+        p[0] = ('DP_EXTRACT', arg1, None)
+    elif func_name == 'SQLCreate':
+        p[0] = ('DP_SQLCREATE', arg1, None)
     else:
         p[0] = ('DP_UNKNOWN', arg1, None)
+
+def p_statement_dp_string_arg(p):
+    '''statement : DP DOT IDENTIFIER LPAREN STRING RPAREN'''
+    func_name = p[3]
+    arg1 = p[5]
+    if func_name == 'Kaggle':
+        p[0] = ('DP_KAGGLE', arg1, None)
+    elif func_name == 'SQLCreate':
+        p[0] = ('DP_SQLCREATE', arg1, None)
+    elif func_name == 'Summarize':
+        p[0] = ('DP_SUMMARIZE', arg1, None)
+    else:
+        p[0] = ('DP_UNKNOWN', arg1, None)
+
+def p_statement_dp_string_two_args(p):
+    '''statement : DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA STRING RPAREN'''
+    func_name = p[3]
+    arg1 = p[5]
+    arg2 = p[7]
+    if func_name == 'Kaggle':
+        p[0] = ('DP_KAGGLE', arg1, arg2)
+    elif func_name == 'SQLCreate':
+        p[0] = ('DP_SQLCREATE', arg1, arg2)
+    elif func_name == 'Extract':
+        p[0] = ('DP_EXTRACT', arg1, arg2)
+    elif func_name == 'Train':
+        p[0] = ('DP_TRAIN', arg1, arg2, 'auto')
+    elif func_name == 'Filter':
+        p[0] = ('DP_FILTER', arg1, arg2)
+    elif func_name == 'SQL':
+        p[0] = ('DP_SQL', arg1, arg2)
+    else:
+        p[0] = ('DP_UNKNOWN', arg1, arg2)
 
 def p_statement_load(p):
     '''statement : LOAD STRING AS IDENTIFIER'''
