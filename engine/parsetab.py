@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = 'AS COMMA DOT DP EQUALS FILTER GREATER IDENTIFIER LESS LOAD LPAREN NUMBER PLOT RPAREN STRING WHEREprogram : statement_liststatement_list : statementstatement_list : statement_list statementstatement : DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPARENstatement : DP DOT IDENTIFIER LPAREN IDENTIFIER RPARENstatement : LOAD STRING AS IDENTIFIERstatement : FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIERstatement : PLOT IDENTIFIER AS IDENTIFIERcomparison : GREATER\n                  | LESS\n                  | EQUALS'
+_lr_signature = 'AS COMMA DOT DP EQUALS FILTER GREATER IDENTIFIER LESS LOAD LPAREN NUMBER PLOT RPAREN STRING WHEREprogram : statement_liststatement_list : statementstatement_list : statement_list statementstatement : DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPARENstatement : DP DOT IDENTIFIER LPAREN IDENTIFIER RPARENstatement : DP DOT IDENTIFIER LPAREN STRING RPARENstatement : DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA STRING RPARENstatement : LOAD STRING AS IDENTIFIERstatement : FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIERstatement : PLOT IDENTIFIER AS IDENTIFIERcomparison : GREATER\n                  | LESS\n                  | EQUALS'
     
-_lr_action_items = {'DP':([0,2,3,8,18,20,27,31,32,],[4,4,-2,-3,-6,-8,-5,-4,-7,]),'LOAD':([0,2,3,8,18,20,27,31,32,],[5,5,-2,-3,-6,-8,-5,-4,-7,]),'FILTER':([0,2,3,8,18,20,27,31,32,],[6,6,-2,-3,-6,-8,-5,-4,-7,]),'PLOT':([0,2,3,8,18,20,27,31,32,],[7,7,-2,-3,-6,-8,-5,-4,-7,]),'$end':([1,2,3,8,18,20,27,31,32,],[0,-1,-2,-3,-6,-8,-5,-4,-7,]),'DOT':([4,],[9,]),'STRING':([5,],[10,]),'IDENTIFIER':([6,7,9,14,15,16,17,26,30,],[11,12,13,18,19,20,21,29,32,]),'AS':([10,12,28,],[14,16,30,]),'WHERE':([11,],[15,]),'LPAREN':([13,],[17,]),'GREATER':([19,],[23,]),'LESS':([19,],[24,]),'EQUALS':([19,],[25,]),'COMMA':([21,],[26,]),'RPAREN':([21,29,],[27,31,]),'NUMBER':([22,23,24,25,],[28,-9,-10,-11,]),}
+_lr_action_items = {'DP':([0,2,3,8,18,20,28,29,34,35,36,],[4,4,-2,-3,-8,-10,-5,-6,-4,-7,-9,]),'LOAD':([0,2,3,8,18,20,28,29,34,35,36,],[5,5,-2,-3,-8,-10,-5,-6,-4,-7,-9,]),'FILTER':([0,2,3,8,18,20,28,29,34,35,36,],[6,6,-2,-3,-8,-10,-5,-6,-4,-7,-9,]),'PLOT':([0,2,3,8,18,20,28,29,34,35,36,],[7,7,-2,-3,-8,-10,-5,-6,-4,-7,-9,]),'$end':([1,2,3,8,18,20,28,29,34,35,36,],[0,-1,-2,-3,-8,-10,-5,-6,-4,-7,-9,]),'DOT':([4,],[9,]),'STRING':([5,17,27,],[10,22,32,]),'IDENTIFIER':([6,7,9,14,15,16,17,27,33,],[11,12,13,18,19,20,21,31,36,]),'AS':([10,12,30,],[14,16,33,]),'WHERE':([11,],[15,]),'LPAREN':([13,],[17,]),'GREATER':([19,],[24,]),'LESS':([19,],[25,]),'EQUALS':([19,],[26,]),'COMMA':([21,],[27,]),'RPAREN':([21,22,31,32,],[28,29,34,35,]),'NUMBER':([23,24,25,26,],[30,-11,-12,-13,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'program':([0,],[1,]),'statement_list':([0,],[2,]),'statement':([0,2,],[3,8,]),'comparison':([19,],[22,]),}
+_lr_goto_items = {'program':([0,],[1,]),'statement_list':([0,],[2,]),'statement':([0,2,],[3,8,]),'comparison':([19,],[23,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -31,11 +31,13 @@ _lr_productions = [
   ('statement_list -> statement','statement_list',1,'p_statement_list_single','parser.py',10),
   ('statement_list -> statement_list statement','statement_list',2,'p_statement_list_multiple','parser.py',14),
   ('statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN','statement',8,'p_statement_dp_two_args','parser.py',18),
-  ('statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN','statement',6,'p_statement_dp_one_arg','parser.py',38),
-  ('statement -> LOAD STRING AS IDENTIFIER','statement',4,'p_statement_load','parser.py',55),
-  ('statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER','statement',8,'p_statement_filter','parser.py',59),
-  ('statement -> PLOT IDENTIFIER AS IDENTIFIER','statement',4,'p_statement_plot','parser.py',63),
-  ('comparison -> GREATER','comparison',1,'p_comparison','parser.py',67),
-  ('comparison -> LESS','comparison',1,'p_comparison','parser.py',68),
-  ('comparison -> EQUALS','comparison',1,'p_comparison','parser.py',69),
+  ('statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER RPAREN','statement',6,'p_statement_dp_one_arg','parser.py',52),
+  ('statement -> DP DOT IDENTIFIER LPAREN STRING RPAREN','statement',6,'p_statement_dp_string_arg','parser.py',85),
+  ('statement -> DP DOT IDENTIFIER LPAREN IDENTIFIER COMMA STRING RPAREN','statement',8,'p_statement_dp_string_two_args','parser.py',98),
+  ('statement -> LOAD STRING AS IDENTIFIER','statement',4,'p_statement_load','parser.py',118),
+  ('statement -> FILTER IDENTIFIER WHERE IDENTIFIER comparison NUMBER AS IDENTIFIER','statement',8,'p_statement_filter','parser.py',122),
+  ('statement -> PLOT IDENTIFIER AS IDENTIFIER','statement',4,'p_statement_plot','parser.py',126),
+  ('comparison -> GREATER','comparison',1,'p_comparison','parser.py',130),
+  ('comparison -> LESS','comparison',1,'p_comparison','parser.py',131),
+  ('comparison -> EQUALS','comparison',1,'p_comparison','parser.py',132),
 ]
